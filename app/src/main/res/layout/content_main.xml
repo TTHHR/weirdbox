@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="cn.atd3.weirdbox.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+    <LinearLayout
+        android:id="@+id/layout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:text="亲密度:"
+            android:id="@+id/qinmiText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp" />
+        <TextView
+            android:text="饥饿度:"
+            android:id="@+id/jieText"
+            android:textSize="10sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="心情："
+            android:id="@+id/xinqingText"
+            android:textSize="10sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginLeft="8px"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/layout1"
+        android:layout_toEndOf="@+id/layout1"
+        android:id="@+id/table">
+        <ProgressBar
+            android:id="@+id/qinmiBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="7.5dp"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginTop="8px"
+            android:layout_marginRight="8px"
+            android:progressDrawable="@drawable/progressbar"
+            android:visibility="visible"/>
+        <ProgressBar
+            android:id="@+id/jieBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="7.5dp"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginTop="8px"
+            android:layout_marginRight="8px"
+            android:progressDrawable="@drawable/progressbar"
+            android:visibility="visible"/>
+        <ProgressBar
+            android:id="@+id/xinqingBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="7.5dp"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginTop="8px"
+            android:layout_marginRight="8px"
+            android:progressDrawable="@drawable/progressbar"
+            android:visibility="visible"/>
+
+    </LinearLayout>
+
+    <WebView android:id="@+id/gif"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
