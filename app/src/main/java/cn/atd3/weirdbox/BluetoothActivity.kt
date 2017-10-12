@@ -134,27 +134,27 @@ class BluetoothActivity : AppCompatActivity() {
                     os = blueSocket!!.outputStream
                 `is` = blueSocket!!.inputStream
                 os!!.write("r".toByteArray())
+                Log.e("rr","rrrrr......................")
                 os!!.flush()
                 val br = BufferedReader(InputStreamReader(`is`!!))
                 val list = ArrayList<String>()
                 val wifi: MutableList<String> = mutableListOf()
                 var s=br.readLine()
                 while (s!=null) {
+                    if(s.equals("OK"))
+                        break
+                    Log.e("ss","ssssss......................")
                     val pa = Pattern.compile("\"(.*)\",-")//源码中的正则表达式
                     val ma = pa.matcher(s)
-                    while (ma.find())
+                    if (ma.find())
                     //寻找符合el的字串
                     {
-                        list.add(ma.group())//将符合el的字串加入到list中
+                        s = ma.group()
+                        s = s!!.replace("\",-".toRegex(), "").replace("\"".toRegex(), "")
+                        wifi.add(s)
                     }
-                    s = ""
-                    for (i in list.indices) {
-                        s = s!! + list[i]
-                    }
-                    s = s!!.replace("\",-".toRegex(), "").replace("\"".toRegex(), "")
-
-                    wifi.add(s)
                     s=br.readLine()
+                    Log.e("....", wifi.toString())
                 }
                 Log.e("....", wifi.toString())
                 val listAdapter = ArrayAdapter<String>(this@BluetoothActivity, android.R.layout.simple_list_item_1, wifi)
@@ -171,7 +171,9 @@ class BluetoothActivity : AppCompatActivity() {
                             os!!.write(("\n\"" + wifiname + "\",\"" + password.text.toString() + "\"\n").toByteArray())
                             os!!.flush()
                             val br = BufferedReader(InputStreamReader(`is`!!))
-                            if (br.readLine() == "link to Router Success!") {
+                            val info=br.readLine()
+                            Log.e("info",info)
+                            if (info == "link to Router Success!") {
                                 Toast.makeText(this@BluetoothActivity, "连接成功！", Toast.LENGTH_SHORT).show()
                                 this@BluetoothActivity.finish()
                             } else {
@@ -193,7 +195,7 @@ class BluetoothActivity : AppCompatActivity() {
     override fun onDestroy() {
         // TODO: Implement this method
         super.onDestroy()
-        blueAdapter!!.disable()//关闭
+
         try {
             if (os != null)
                 os!!.close()
@@ -201,7 +203,7 @@ class BluetoothActivity : AppCompatActivity() {
                 osw!!.close()
         } catch (e: Exception) {
         }
-
+        blueAdapter!!.disable()//关闭
     }
 
 

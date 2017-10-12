@@ -39,10 +39,6 @@ import java.io.OutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     /* 服务器地址 */
@@ -52,11 +48,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var socket: Socket? = null
     private var `in`: InputStream? = null
     private var out: OutputStream? = null
-    private var clock = "1465539000000"
+    private var clock = "0,0,0"
     private var feeltemp = 0
     private var clockmusic = 0
     private var light = 0
     private var chuo: Long = 0
+    private var q=-1
+    private var x=-1
+   private var  j=-1
     private val fileurl = "file:///android_asset/"
      var qinmiBar: ProgressBar?=null
      var jieBar: ProgressBar?=null
@@ -78,6 +77,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             handler!!.sendMessage(message)
         }
     }
+    lateinit  var dialog:MyDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,7 +86,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setSupportActionBar(toolbar)
         toolbar.setLogo(R.mipmap.online)
 
-
         qinmiBar = findViewById(R.id.qinmiBar) as ProgressBar
         jieBar = findViewById(R.id.jieBar) as ProgressBar
         xinqingBar = findViewById(R.id.xinqingBar) as ProgressBar
@@ -94,7 +93,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         xinqingText = findViewById(R.id.xinqingText) as TextView
         jieText = findViewById(R.id.jieText) as TextView
         gf = findViewById(R.id.gif) as WebView
-        gf!!.loadUrl(fileurl + "gif0.gif")
+        gf!!.loadUrl(fileurl + "gif1.gif")
 
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener(View.OnClickListener { view ->
@@ -138,28 +137,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         handler = object : Handler() {
             override fun handleMessage(msg: Message) {
                 val s = msg.obj as String
-                /*try{
-                    JSONObject jsonObject=new JSONObject(s);
-                    Date dt=new Date(jsonObject.getLong("clock"));
-                    DateFormat df = new SimpleDateFormat("HH:mm");
-                    light=jsonObject.getInt("light");
-                    clockmusic=jsonObject.getInt("clockmusic");
-                    qinmiText.setText("亲密度："+jsonObject.getInt("qinmi"));
-                    jieText.setText("饥饿度："+jsonObject.getInt("hunger"));
-                    xinqingText.setText("心情："+jsonObject.getInt("feel"));
-                    qinmiBar.setProgress(jsonObject.getInt("qinmi"));
-                    xinqingBar.setProgress(jsonObject.getInt("feel"));
-                    jieBar.setProgress(jsonObject.getInt("hunger"));
-                    toolbar.setLogo(jsonObject.getBoolean("online")==true?R.mipmap.online:R.mipmap.outline);
-                    webView.loadUrl(fileurl+jsonObject.getInt("biaoqing")+".gif");
-                    clock=jsonObject.getLong("clock")+"";
-                    Log.e("tthhr",jsonObject.getLong("clock")+"clock"+System.currentTimeMillis()+"now");
-                }
-                catch (Exception e)
-                {
-                    Toast.makeText(MainActivity.this,"发生错误"+e, Toast.LENGTH_LONG).show();
-                }
-                */
+
+                    val jsonObject=JSONObject(s)
+                    light=jsonObject.getInt("light")
+                    clockmusic=jsonObject.getInt("clockmusic")
+                    qinmiText!!.setText("亲密度："+jsonObject.getInt("qinmi"))
+                    jieText!!.setText("饥饿度："+jsonObject.getInt("hunger"))
+                    xinqingText!!.setText("心情："+jsonObject.getInt("feel"))
+                    qinmiBar!!.setProgress(jsonObject.getInt("qinmi"))
+                    xinqingBar!!.setProgress(jsonObject.getInt("feel"))
+                    jieBar!!.setProgress(jsonObject.getInt("hunger"))
+                    if(jsonObject.getBoolean("online")==true)
+                    toolbar.setLogo(R.mipmap.online)
+                    else
+                    toolbar.setLogo(R.mipmap.outline)
+                    gf!!.loadUrl(fileurl+"gif"+jsonObject.getInt("biaoqing")+".gif")
+
                 Log.e("msg", s)
                 super.handleMessage(msg)
             }
@@ -196,63 +189,32 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val i = Intent(this@MainActivity, SelectDeviceActivity::class.java)
             startActivity(i)
         } else if (id == R.id.nav_share) {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "image/*"
-            intent.putExtra(Intent.EXTRA_SUBJECT, "分享")
-            intent.putExtra(Intent.EXTRA_TEXT, "Weird Box好有趣，快来玩玩吧！下载地址：http://www.15wedian.cn/ ")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(Intent.createChooser(intent, getTitle()))
+            val  diaClick=View.OnClickListener {
+                q=Integer.parseInt(dialog!!.q.text.toString())
+                x=Integer.parseInt(dialog!!.x.text.toString())
+                j=Integer.parseInt(dialog!!.j.text.toString())
+                Thread(Runnable {
+                    val message = Message()
+                    message.obj = initClientSocket()
+                    handler!!.sendMessage(message)
+                }).start()
+                Log.e("qqqq",""+q+x+j)
+            }
+            dialog=MyDialog(this, R.animator.animdialog,diaClick)
+
+            dialog!!.show()
         } else if (id == R.id.nav_exit) {
             finish()
             System.exit(0)
         } else if (id == R.id.clock) {
-            val dt = Date(java.lang.Long.parseLong(clock))
-            var df: DateFormat = SimpleDateFormat("HH")
-            val hour = Integer.parseInt(df.format(dt))
-            df = SimpleDateFormat("mm")
-            val minute = Integer.parseInt(df.format(dt))
+
 
             val mTimeSetListener = TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 clock = hourOfDay.toString() + ":" + minute
                 item.title = "当前闹钟： " + clock
-                var dt = Date()
-                var df: DateFormat = SimpleDateFormat("HH:mm")
-                var nowTime = ""
-                nowTime = df.format(dt)
-                if (nowTime.compareTo(clock) <= 0) {//如果就是今天
-                    df = SimpleDateFormat("yyyy-MM-dd")
-                    clock = df.format(dt) + " " + clock
-                    df = SimpleDateFormat("yyyy-MM-dd HH:mm")
-                    try {
-                        dt = df.parse(clock)
-                    } catch (e: Exception) {
 
-                    }
+                clock=hourOfDay.toString()+","+minute+","+"00"
 
-                    clock = dt.time.toString() + ""
-                } else
-                //否则日期加一
-                {
-                    var date = Date()
-                    df = SimpleDateFormat("yyyy-MM-dd")
-                    df.format(date)
-                    try {
-                        date = df.parse(df.format(date))
-                    } catch (e: Exception) {
-
-                    }
-
-                    val calendar = Calendar.getInstance()
-                    calendar.add(Calendar.DATE, 1)
-                    clock = df.format(calendar.time) + " " + clock
-                    try {
-                        date = SimpleDateFormat("yyyy-MM-dd HH:mm").parse(clock)
-                    } catch (e: Exception) {
-
-                    }
-
-                    clock = date.time.toString() + ""
-                }
                 Thread(Runnable {
                     val message = Message()
                     message.obj = initClientSocket()
@@ -265,6 +227,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 val listAdapter = ArrayAdapter<String>(this@MainActivity, android.R.layout.simple_list_item_1, music)
                 lv.adapter = listAdapter
                 lv.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+                    clockmusic=position
                     var mp3 = MediaPlayer()    //创建一个MediaPlayer对象
                     mp3 = MediaPlayer.create(this@MainActivity, musicId[position])
                     try {
@@ -275,7 +238,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
                 val b = AlertDialog.Builder(this@MainActivity)
                 b.setTitle("设置闹钟音乐：").setView(lv).setNegativeButton("确定", DialogInterface.OnClickListener { dialog, which ->
-                    clockmusic = lv.checkedItemPosition
+
                     Thread(Runnable {
                         val message = Message()
                         message.obj = initClientSocket()
@@ -284,7 +247,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }).setPositiveButton("取消", null).setIcon(R.mipmap.light).show()
             }
 
-            val mTimePickerDialog = TimePickerDialog(this, mTimeSetListener, hour, minute, true)
+            val mTimePickerDialog = TimePickerDialog(this, mTimeSetListener, 0, 0, true)
             mTimePickerDialog.show()
         } else if (id == R.id.light) {
             val factory = LayoutInflater.from(this)
@@ -345,7 +308,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             dataJson.value("put")
 
             dataJson.key("clock")
-            dataJson.value(java.lang.Long.parseLong(clock))
+            dataJson.value(clock)
             dataJson.key("light")
             dataJson.value(light.toLong())
             dataJson.key("feeltemp")
@@ -353,11 +316,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             feeltemp = 0
             dataJson.key("clockmusic")
             dataJson.value(clockmusic.toLong())
+            dataJson.key("q")
+            dataJson.value(q)
+            dataJson.key("x")
+            dataJson.value(x)
+            dataJson.key("j")
+            dataJson.value(j)
             dataJson.endObject()
             out!!.write((dataJson.toString() + "\n").toByteArray())
             out!!.flush()
             s = bf.readLine()
-
+            Log.e("qqqq",dataJson.toString())
         } catch (e: Exception) {
             Log.e("TTHHR", "exception: " + e.toString())
             s = e.toString()

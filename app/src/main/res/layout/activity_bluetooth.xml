@@ -10,16 +10,24 @@
     tools:context="cn.atd3.weirdbox.BluetoothActivity">
 
     <ListView
+
         android:layout_below="@+id/button"
         android:layout_width="match_parent"
         android:id="@+id/listView"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
     </ListView>
 
     <Button
+        android:layout_alignParentTop="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="New Button"
+        android:text="连接wifi"
         android:id="@+id/button" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/button"
+        android:text="长时间未响应，建议重启盒子"
+        />
 </RelativeLayout>
